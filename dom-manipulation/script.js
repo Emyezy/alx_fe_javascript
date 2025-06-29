@@ -3,10 +3,10 @@ let quotes = [];
 // Cached DOM elements
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteButton = document.getElementById("newQuote");
-const categorySelect = document.getElementById("categorySelect");
+const categoryFilter = document.getElementById("categoryFilter");
 const addQuoteContainer = document.getElementById("addQuoteContainer");
 
-// Load quotes from local storage or use defaults
+// Load quotes from local storage or defaults
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
   if (storedQuotes) {
@@ -24,40 +24,49 @@ function loadQuotes() {
 // Save quotes to local storage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
-  populateCategorySelect();
+  populateCategories();
 }
 
-// Populate category dropdown
-function populateCategorySelect() {
+// Populate category dropdown for filtering
+function populateCategories() {
   const categories = Array.from(new Set(quotes.map(q => q.category)));
 
-  categorySelect.innerHTML = `<option value="all">All</option>`;
+  categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
   
   categories.forEach(cat => {
     const option = document.createElement("option");
     option.value = cat;
     option.textContent = cat;
-    categorySelect.appendChild(option);
+    categoryFilter.appendChild(option);
   });
+
+  // Restore last selected filter from local storage
+  const savedFilter = localStorage.getItem("selectedCategoryFilter");
+  if (savedFilter) {
+    categoryFilter.value = savedFilter;
+  }
 }
 
-// Show a random quote, save to session storage
-function showRandomQuote() {
-  const selectedCategory = categorySelect.value;
+// Filter quotes based on selected category
+function filterQuotes() {
+  const selectedCategory = categoryFilter.value;
+  localStorage.setItem("selectedCategoryFilter", selectedCategory);
+
   const filteredQuotes = selectedCategory === "all"
     ? quotes
     : quotes.filter(q => q.category.toLowerCase() === selectedCategory.toLowerCase());
 
   if (filteredQuotes.length === 0) {
     quoteDisplay.textContent = "No quotes available for this category.";
-    return;
+  } else {
+    const randomQuote = filteredQuotes[Math.floor(Math.random() * filteredQuotes.length)];
+    quoteDisplay.textContent = `"${randomQuote.text}" — [${randomQuote.category}]`;
   }
+}
 
-  const randomQuote = filteredQuotes[Math.floor(Math.random() * filteredQuotes.length)];
-  quoteDisplay.textContent = `"${randomQuote.text}" — [${randomQuote.category}]`;
-
-  // Save last viewed quote to session storage
-  sessionStorage.setItem("lastQuote", JSON.stringify(randomQuote));
+// Show a random quote (respects current filter)
+function showRandomQuote() {
+  filterQuotes();
 }
 
 // Dynamically create the Add Quote Form
@@ -85,7 +94,7 @@ function createAddQuoteForm() {
   addQuoteContainer.appendChild(form);
 }
 
-// Add a new quote dynamically
+// Add a new quote and update storage
 function addQuote() {
   const quoteText = document.getElementById("newQuoteText").value.trim();
   const quoteCategory = document.getElementById("newQuoteCategory").value.trim();
@@ -104,7 +113,7 @@ function addQuote() {
   alert("Quote added successfully!");
 }
 
-// Export quotes as JSON file
+// Export quotes as JSON
 function exportQuotes() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -137,20 +146,12 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// Load last viewed quote from session storage
-function loadLastViewedQuote() {
-  const lastQuote = sessionStorage.getItem("lastQuote");
-  if (lastQuote) {
-    const quoteObj = JSON.parse(lastQuote);
-    quoteDisplay.textContent = `"${quoteObj.text}" — [${quoteObj.category}]`;
-  }
-}
-
-// Event Listeners
-newQuoteButton.addEventListener("click", showRandomQuote);
-
 // Initialization
 loadQuotes();
-populateCategorySelect();
+populateCategories();
 createAddQuoteForm();
-loadLastViewedQuote();
+
+// Restore and apply last filter
+filterQuotes();
+
+newQuoteButton.addEventListener("click", showRandomQuote);
