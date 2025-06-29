@@ -40,7 +40,6 @@ function populateCategories() {
     categoryFilter.appendChild(option);
   });
 
-  // Restore last selected filter from local storage
   const savedFilter = localStorage.getItem("selectedCategoryFilter");
   if (savedFilter) {
     categoryFilter.value = savedFilter;
@@ -64,12 +63,12 @@ function filterQuotes() {
   }
 }
 
-// Show a random quote (respects current filter)
+// Show a random quote (respects filter)
 function showRandomQuote() {
   filterQuotes();
 }
 
-// Dynamically create the Add Quote Form
+// Add Quote Form
 function createAddQuoteForm() {
   const form = document.createElement("div");
 
@@ -94,7 +93,7 @@ function createAddQuoteForm() {
   addQuoteContainer.appendChild(form);
 }
 
-// Add a new quote and update storage
+// Add a new quote
 function addQuote() {
   const quoteText = document.getElementById("newQuoteText").value.trim();
   const quoteCategory = document.getElementById("newQuoteCategory").value.trim();
@@ -137,7 +136,7 @@ function importFromJsonFile(event) {
         saveQuotes();
         alert('Quotes imported successfully!');
       } else {
-        alert('Invalid JSON format. Expected an array of quotes.');
+        alert('Invalid JSON format.');
       }
     } catch (e) {
       alert('Error parsing JSON file.');
@@ -146,12 +145,43 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
+// Simulate server fetch and sync
+function syncWithServer() {
+  fetch("https://jsonplaceholder.typicode.com/posts")
+    .then(response => response.json())
+    .then(serverData => {
+      // Simulate server returning quotes
+      const serverQuotes = serverData.slice(0, 5).map(post => ({
+        text: post.title,
+        category: "Server"
+      }));
+
+      let conflicts = false;
+
+      serverQuotes.forEach(serverQuote => {
+        if (!quotes.some(q => q.text === serverQuote.text)) {
+          quotes.push(serverQuote);
+          conflicts = true;
+        }
+      });
+
+      if (conflicts) {
+        saveQuotes();
+        alert("New quotes received from server and added to your list.");
+      }
+    })
+    .catch(() => {
+      console.log("Failed to fetch from server (simulated).");
+    });
+}
+
 // Initialization
 loadQuotes();
 populateCategories();
 createAddQuoteForm();
-
-// Restore and apply last filter
 filterQuotes();
 
 newQuoteButton.addEventListener("click", showRandomQuote);
+
+// Periodic server sync every 20 seconds
+setInterval(syncWithServer, 20000);
