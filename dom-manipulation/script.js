@@ -145,33 +145,33 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// ✅ Function to fetch quotes from server and handle syncing
-function fetchQuotesFromServer() {
-  fetch("https://jsonplaceholder.typicode.com/posts")
-    .then(response => response.json())
-    .then(serverData => {
-      const serverQuotes = serverData.slice(0, 5).map(post => ({
-        text: post.title,
-        category: "Server"
-      }));
+// ✅ Function to fetch quotes from server and handle syncing using async/await
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const serverData = await response.json();
 
-      let conflicts = false;
+    const serverQuotes = serverData.slice(0, 5).map(post => ({
+      text: post.title,
+      category: "Server"
+    }));
 
-      serverQuotes.forEach(serverQuote => {
-        if (!quotes.some(q => q.text === serverQuote.text)) {
-          quotes.push(serverQuote);
-          conflicts = true;
-        }
-      });
+    let conflicts = false;
 
-      if (conflicts) {
-        saveQuotes();
-        alert("New quotes received from server and added to your list.");
+    serverQuotes.forEach(serverQuote => {
+      if (!quotes.some(q => q.text === serverQuote.text)) {
+        quotes.push(serverQuote);
+        conflicts = true;
       }
-    })
-    .catch(() => {
-      console.log("Failed to fetch from server (simulated).");
     });
+
+    if (conflicts) {
+      saveQuotes();
+      alert("New quotes received from server and added to your list.");
+    }
+  } catch (error) {
+    console.log("Failed to fetch from server (simulated).");
+  }
 }
 
 // Initialization
