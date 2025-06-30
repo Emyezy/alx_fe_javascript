@@ -139,4 +139,22 @@ function importFromJsonFile(event) {
         alert('Invalid JSON format.');
       }
     } catch (e) {
-      a
+      alert('Error parsing JSON file.');
+    }
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+// ✅ Function to fetch quotes from server and handle syncing
+function fetchQuotesFromServer() {
+  fetch("https://jsonplaceholder.typicode.com/posts")
+    .then(response => response.json())
+    .then(serverData => {
+      const serverQuotes = serverData.slice(0, 5).map(post => ({
+        text: post.title,
+        category: "Server"
+      }));
+
+      let conflicts = false;
+
+      serverQuotes.forEach(s
