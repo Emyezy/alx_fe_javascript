@@ -157,4 +157,30 @@ function fetchQuotesFromServer() {
 
       let conflicts = false;
 
-      serverQuotes.forEach(s
+      serverQuotes.forEach(serverQuote => {
+        if (!quotes.some(q => q.text === serverQuote.text)) {
+          quotes.push(serverQuote);
+          conflicts = true;
+        }
+      });
+
+      if (conflicts) {
+        saveQuotes();
+        alert("New quotes received from server and added to your list.");
+      }
+    })
+    .catch(() => {
+      console.log("Failed to fetch from server (simulated).");
+    });
+}
+
+// Initialization
+loadQuotes();
+populateCategories();
+createAddQuoteForm();
+filterQuotes();
+
+newQuoteButton.addEventListener("click", showRandomQuote);
+
+// Periodic server sync every 20 seconds
+setInterval(fetchQuotesFromServer, 20000);
