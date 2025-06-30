@@ -196,6 +196,11 @@ async function postQuoteToServer(quote) {
   }
 }
 
+// ✅ Function to manually sync quotes (calls fetchQuotesFromServer)
+function syncQuotes() {
+  fetchQuotesFromServer();
+}
+
 // Initialization
 loadQuotes();
 populateCategories();
