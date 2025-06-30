@@ -169,6 +169,8 @@ async function fetchQuotesFromServer() {
     if (conflicts) {
       saveQuotes();
       alert("New quotes received from server and added to your list.");
+    } else {
+      showNotification("Quotes synced with server!");
     }
   } catch (error) {
     console.log("Failed to fetch from server (simulated).");
@@ -199,6 +201,25 @@ async function postQuoteToServer(quote) {
 // ✅ Function to manually sync quotes (calls fetchQuotesFromServer)
 function syncQuotes() {
   fetchQuotesFromServer();
+}
+
+// ✅ Notification for user feedback
+function showNotification(message) {
+  const notification = document.createElement("div");
+  notification.textContent = message;
+  notification.style.position = "fixed";
+  notification.style.bottom = "10px";
+  notification.style.right = "10px";
+  notification.style.backgroundColor = "#4caf50";
+  notification.style.color = "white";
+  notification.style.padding = "10px";
+  notification.style.borderRadius = "5px";
+  notification.style.boxShadow = "0 2px 5px rgba(0,0,0,0.3)";
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
 }
 
 // Initialization
